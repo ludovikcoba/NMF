@@ -36,15 +36,12 @@ adjCos <- FALSE
 topN <- 10
 
 positiveThreshold <- 3 # when a ratign is considered a negative feedback
-
+source("src/readML_big.R")
 # Read Data
-if(ds == "ml100k") source("src/readML100K.R") # will load ml100k and movie_categories in the environment.
-if(ds == "ml1m") {
-  source("src/readML1M.R")
-  dataset <- getml1m()
-  categories <- dataset[[2]]
-  dataset <- dataset[[1]]
-}
+
+dataset <- getML("ml20m")
+categories <- dataset[[2]]
+dataset <- dataset[[1]]
 
 
 source("src/evalSplit.R") # load the splitting function. Stratified splitting of the dataset in tran/test, given a splitting ratio.
@@ -140,6 +137,6 @@ for (rNVL in regCoefNovelty){
 }
 res <- cbind(regCoefNovelty,res)
 
-write.csv(res, paste0("results/",outputFile))
+write.csv(res, outputFile)
 
 
