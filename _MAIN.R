@@ -140,6 +140,6 @@ for (rNVL in regCoefNovelty){
 }
 res <- cbind(regCoefNovelty,res)
 
-write.csv(res, outputFile)
+write.csv(res, paste0("results/",outputFile))
 
 

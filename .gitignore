@@ -35,4 +35,4 @@
 *.csv
 *.zip
 datasets/
-results/
+results/*.*
