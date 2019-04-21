@@ -1,25 +1,26 @@
 Novelty <- function(train, dataset, categories){
 
-  users<- inner_join(train, categories, by = c("item") ) # find to which category training items belong
+  users<- dplyr::inner_join(train, categories, by = c("item") ) # find to which category training items belong
   
   # count how many times a user has seen a category only on the trainset
   nvl <- users %>%
-    select(-item, -score) %>%
-    group_by(user) %>%
-    summarise_all(funs(sum))
+    dplyr::select(-item, -score) %>%
+    dplyr::group_by(user) %>%
+    dplyr::summarise_all(dplyr::funs(sum))
   
 
   # group user items and categories
-  nvl <- nvl %>% group_by(user) %>% 
-    nest(.key = "usrNov") 
+  nvl <- nvl %>% 
+    dplyr::group_by(user) %>% 
+    tidyr::nest(.key = "usrNov") 
   
-  users<- inner_join(dataset, categories, by = c("item") ) # find to which category all items belong
+  users<- dplyr::inner_join(dataset, categories, by = c("item") ) # find to which category all items belong
   users <- users %>% 
-    group_by(user) %>% 
-    select(-score) %>% 
-    nest(.key = "items")
+    dplyr::group_by(user) %>% 
+    dplyr::select(-score) %>% 
+    tidyr::nest(.key = "items")
   
-  users <- inner_join(users, nvl)
+  users <- dplyr::inner_join(users, nvl)
   
   nvlCmp <- function(items, usrNov){
 
@@ -32,9 +33,9 @@ Novelty <- function(train, dataset, categories){
   
   # compute and return novelty 
   users %>% 
-    mutate(Novelty = map2(items, usrNov, nvlCmp)) %>% 
-    select(user, Novelty) %>% 
-    unnest()
+    dplyr::mutate(Novelty = purrr::map2(items, usrNov, nvlCmp)) %>% 
+    dplyr::select(user, Novelty) %>% 
+    tidyr::unnest()
   
   
 }

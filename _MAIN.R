@@ -1,16 +1,20 @@
+#!/usr/bin/env Rscript
+args = commandArgs(trailingOnly=TRUE)
+
 if (length(args)==0) {
   stop("At least one argument must be supplied.", call.=FALSE)
-} else if (length(args)==1) {
+} else {
   ds = args[1]
   oFile = args[2]
 }
 
 
 ## Note: many method are imported from rrecsys
-install.packages("rrecsys", repos='http://cran.us.r-project.org') # please install the library to acknowledge the authors!
+#install.packages("rrecsys", repos='http://cran.us.r-project.org') # please install the library to acknowledge the authors!
 #### Requirements
 if (!require(Rcpp)) install.packages("Rcpp", repos='http://cran.us.r-project.org')
 if (!require(tidyverse)) install.packages("tidyverse", repos='http://cran.us.r-project.org')
+if (!require(dplyr)) install.packages("dplyr", repos='http://cran.us.r-project.org')
 if (!require(readr)) install.packages("readr", repos='http://cran.us.r-project.org')
 
 #######################
@@ -22,13 +26,13 @@ if (!require(readr)) install.packages("readr", repos='http://cran.us.r-project.o
 #######################
 
 #### Parameters - Config
-outputFile <- "results.txt"
+outputFile <- oFile
 
 Neigh <- 10
 Shrinkage <- 10 # damping on similarity computation.
 learningRate <- 0.001
 regCoef <- 0.001
-regCoefNovelty <- c(0:10)/10
+regCoefNovelty <- c(0)/10
 nrfeat <- 80 #nr latent features
 steps <- 100 # number of iterations
 reg <- 3 # 1 MF, 2 L2 regulariztion, 3 L1 regularization
@@ -39,7 +43,7 @@ positiveThreshold <- 3 # when a ratign is considered a negative feedback
 source("src/readML_big.R")
 # Read Data
 
-dataset <- getML("ml20m")
+dataset <- getML(ds)
 categories <- dataset[[2]]
 dataset <- dataset[[1]]
 
@@ -61,21 +65,22 @@ d <- evalSplit(dataset, 0.25) # split train/test
 temp <- d$train
 if(adjCos){
   temp <- temp %>% 
-    group_by(user) %>% 
-    summarise(offset = mean(score)) 
+    dplyr::group_by(user) %>% 
+    dplyr::summarise(offset = mean(score)) 
   
-  temp <- inner_join(temp, d$train) %>% 
-    mutate(score = score - offset) %>% select(-offset)
+  temp <- dplyr::inner_join(temp, d$train) %>% 
+    dplyr::mutate(score = score - offset) %>% 
+    dplyr::select(-offset)
 }
 
 
 
 # similarity compute
-sourceCpp("src/compute_similarity.cpp")
-source("src/ALG_similarity.R")
+#sourceCpp("src/compute_similarity.cpp")
+#source("src/ALG_similarity.R")
 
-knnUsr <- similarity(temp, shrinkage = Shrinkage, by = c("user", "item", "score"))
-knnUsr <- getKNN(knnUsr, Neigh)
+#knnUsr <- similarity(temp, shrinkage = Shrinkage, by = c("user", "item", "score"))
+#knnUsr <- getKNN(knnUsr, Neigh)
 
 #### Novelty
 source("src/ALG_Novelty.R")
@@ -118,7 +123,7 @@ for (rNVL in regCoefNovelty){
   
   #### Evaluate 
   
-  rec_nvl <- Novelty(d$train, rec %>% select(-rank) %>% rename(score = predScore), categories)
+  rec_nvl <- Novelty(d$train, rec %>% dplyr::select(-rank) %>% rename(score = predScore), categories)
   
   rec <- left_join(rec, rec_nvl, by = c("user", "item"))
   

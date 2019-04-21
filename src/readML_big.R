@@ -20,12 +20,12 @@ getML<- function(ds){
     
     
     categories <-categories %>%
-      mutate_at(.vars = 6:24, funs(as.numeric(.))) %>%
-      select_at(.vars = c(1,6:24))
+      dplyr::mutate_at(.vars = 6:24, dplyr::funs(as.numeric(.))) %>%
+      dplyr::select_at(.vars = c(1,6:24))
     
     
     categories <- categories %>%
-      arrange(item)
+      dplyr::arrange(item)
     
     return(list(dataset, categories))
     
@@ -91,14 +91,14 @@ getML<- function(ds){
     dataset <- read_table2(pathRT, #<---dataset
                            col_names = FALSE)
     dataset <- dataset %>% 
-      separate(X1, into = c("user","item" ,"score"), sep = sep)
+      tidyr::separate(X1, into = c("user","item" ,"score"), sep = sep)
     dataset <- dataset %>% 
-      mutate(user = as.numeric(user), item = as.numeric(item), score = as.numeric(score))
+      dplyr::mutate(user = as.numeric(user), item = as.numeric(item), score = as.numeric(score))
     
     categories <- read_csv(pathCT, 
                            col_names = FALSE, trim_ws = FALSE)
     categories <-   categories %>% 
-      separate(X1, into = c("item","movie_title" ,"categories"), sep = sep)
+      tidyr::separate(X1, into = c("item","movie_title" ,"categories"), sep = sep)
     
   }
   
@@ -117,8 +117,8 @@ getML<- function(ds){
   colnames(m_cat) = unique_categories
   
   categories <- categories %>%
-    select(item) %>%
-    mutate(item = as.numeric(item))
+    dplyr::select(item) %>%
+    dplyr::mutate(item = as.numeric(item))
   
   categories <- bind_cols(categories,as.data.frame(m_cat))
   
