@@ -30,3 +30,8 @@
 */*.dll
 */*.so
 .Rproj.user
+
+#other
+*.csv
+*.zip
+datasets/
