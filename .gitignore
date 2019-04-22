@@ -36,3 +36,4 @@
 *.zip
 datasets/
 results/*.*
+*.txt

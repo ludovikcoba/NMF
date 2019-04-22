@@ -53,8 +53,16 @@ evalRec <- function(rec, test, topN = 3, positiveThreshold = 3, maximum){
   # mean e_ndcg 
   N_nDCG <- mean(N_nDGCusr$N_nDCG)
   
+  EPC <- Hits %>% 
+    dplyr::mutate(disc = 1/log2(rank + 2), nov = Novelty * disc) %>%
+    dplyr::group_by(user) %>%
+    dplyr::summarise(nov = sum(nov), norm = sum(disc)) %>%
+    dplyr::mutate(epc = nov/norm) %>%
+    dplyr::mutate(epc = tidyr::replace_na(epc, 0))
   
-  return(data.frame(precision, nDCG, N_nDCG))
+  EPC <- mean(EPC$epc)
+  
+  return(data.frame(precision, nDCG, N_nDCG, EPC))
   
 }
 

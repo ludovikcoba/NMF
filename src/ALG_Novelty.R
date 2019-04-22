@@ -1,4 +1,4 @@
-Novelty <- function(train, dataset, categories){
+NoveltyCat <- function(train, dataset, categories){
 
   users<- dplyr::inner_join(train, categories, by = c("item") ) # find to which category training items belong
   
@@ -38,4 +38,19 @@ Novelty <- function(train, dataset, categories){
     tidyr::unnest()
   
   
+}
+
+NoveltyPop <- function(train, dataset){
+
+  nr_usr <- length(unique(train$user))
+
+  # count how many times a user has seen a category only on the trainset
+  nvl <- train %>% 
+    dplyr::group_by(item) %>%
+    dplyr::summarise(Novelty = -log((n() + 1)/nr_usr))
+  
+  
+  nvl$Novelty <- (nvl$Novelty - min(nvl$Novelty))/(max(nvl$Novelty) - min(nvl$Novelty))
+  
+  dplyr::inner_join(dataset, nvl) %>% dplyr::select(-score)
 }

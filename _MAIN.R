@@ -6,6 +6,7 @@ if (length(args)==0) {
 } else {
   ds = args[1]
   oFile = args[2]
+  nov = args[3]
 }
 
 
@@ -32,7 +33,7 @@ Neigh <- 10
 Shrinkage <- 10 # damping on similarity computation.
 learningRate <- 0.001
 regCoef <- 0.001
-regCoefNovelty <- c(0)/10
+regCoefNovelty <- c(0:10)/10
 nrfeat <- 80 #nr latent features
 steps <- 100 # number of iterations
 reg <- 3 # 1 MF, 2 L2 regulariztion, 3 L1 regularization
@@ -62,16 +63,16 @@ d <- evalSplit(dataset, 0.25) # split train/test
 #### Computing item's similarity
 #normalization
 
-temp <- d$train
-if(adjCos){
-  temp <- temp %>% 
-    dplyr::group_by(user) %>% 
-    dplyr::summarise(offset = mean(score)) 
-  
-  temp <- dplyr::inner_join(temp, d$train) %>% 
-    dplyr::mutate(score = score - offset) %>% 
-    dplyr::select(-offset)
-}
+#temp <- d$train
+#if(adjCos){
+#  temp <- temp %>% 
+#    dplyr::group_by(user) %>% 
+#    dplyr::summarise(offset = mean(score)) 
+#  
+#  temp <- dplyr::inner_join(temp, d$train) %>% 
+#    dplyr::mutate(score = score - offset) %>% 
+#    dplyr::select(-offset)
+#}
 
 
 
@@ -84,7 +85,14 @@ if(adjCos){
 
 #### Novelty
 source("src/ALG_Novelty.R")
-Nvl <- Novelty(d$train, dataset, categories) # not so efficient.
+if(nov == "cat"){
+  Nvl <- NoveltyCat(d$train, dataset, categories) # not so efficient.
+}else{
+  Nvl <- NoveltyPop(d$train, dataset)
+}
+
+
+
 
 #### Train
 sourceCpp("src/NMFupdater.cpp")
@@ -122,8 +130,16 @@ for (rNVL in regCoefNovelty){
   rec <- Recommend(train, usrFeatures, itmFeatures, topN)
   
   #### Evaluate 
+  if(nov == "cat"){
+    rec_nvl <- NoveltyCat(d$train, rec %>% 
+                         dplyr::select(-rank) %>% 
+                         rename(score = predScore), categories)
+  }else{
+    rec_nvl <- NoveltyPop(d$train, rec %>% 
+                            dplyr::select(-rank) %>% 
+                            rename(score = predScore))
+  }
   
-  rec_nvl <- Novelty(d$train, rec %>% dplyr::select(-rank) %>% rename(score = predScore), categories)
   
   rec <- left_join(rec, rec_nvl, by = c("user", "item"))
   
