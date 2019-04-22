@@ -152,7 +152,7 @@ for (rNVL in regCoefNovelty){
   }else{
     res <- evalRec(rec, d$test, topN, positiveThreshold, max(dataset$score))
   }
-  
+  write.csv(res, outputFile)
 
   
 }
