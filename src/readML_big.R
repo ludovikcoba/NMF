@@ -33,7 +33,7 @@ getML<- function(ds){
     
     if(!file.exists("datasets/MovieLens/ml-1m/ratings.dat") || !file.exists("datasets/MovieLens/ml-1m/movies.dat")){
       download.file("http://files.grouplens.org/datasets/movielens/ml-1m.zip", destfile = "datasets/MovieLens/ml1m.zip")
-      unzip("datasets/MovieLens/ml1m.zip", exdir = "datasets")
+      unzip("datasets/MovieLens/ml1m.zip", exdir = "datasets/MovieLens/")
     }
     
     pathRT <- "datasets/MovieLens/ml-1m/ratings.dat"
@@ -45,7 +45,7 @@ getML<- function(ds){
     
     if(!file.exists("datasets/MovieLens/ml-10M100K/ratings.dat") || !file.exists("datasets/MovieLens/ml-10M100K/movies.dat")){
       download.file("http://files.grouplens.org/datasets/movielens/ml-10m.zip", destfile = "datasets/MovieLens/ml10m.zip")
-      unzip("datasets/MovieLens/ml10m.zip", exdir = "datasets")
+      unzip("datasets/MovieLens/ml10m.zip", exdir = "datasets/MovieLens/")
     }
     
     pathRT <- "datasets/MovieLens/ml-10M100K/ratings.dat"
@@ -57,7 +57,7 @@ getML<- function(ds){
     
     if(!file.exists("datasets/MovieLens/ml-20m/ratings.csv") || !file.exists("datasets/MovieLens/ml-20m/movies.csv")){
       download.file("http://files.grouplens.org/datasets/movielens/ml-20m.zip", destfile = "datasets/MovieLens/ml20m.zip")
-      unzip("datasets/MovieLens/ml20m.zip", exdir = "datasets")
+      unzip("datasets/MovieLens/ml20m.zip", exdir = "datasets/MovieLens/")
     }
     
     pathRT <- "datasets/MovieLens/ml-20m/ratings.csv"
