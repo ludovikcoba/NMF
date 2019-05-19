@@ -5,8 +5,8 @@ if (length(args)==0) {
   stop("At least one argument must be given", call.=FALSE)
 } else {
   ds = args[1] # values: ml100k, ml1m, ml10m, ml20m, LA, To
-  if(!ds %in% c("ml100k", "ml1m", "ml10m", "ml20m", "LA", "To")){
-    error_msg <- "Argument 1 can be one of: ml100k, ml1m, ml10m, ml20m, LA, To" 
+  if(!ds %in% c("ml100k", "ml1m", "ml10m", "ml20m", "LV", "To")){
+    error_msg <- "Argument 1 can be one of: ml100k, ml1m, ml10m, ml20m, LV, To" 
     stop(error_msg)
   }
   oFile = args[2] # any output file
@@ -59,7 +59,7 @@ if(str_detect(ds, "ml")){
   categories <- dataset[[2]]
   dataset <- dataset[[1]]
 }else{
-  if(ds == "LA"){
+  if(ds == "LV"){
     dataset <- read.csv("datasets/Yelp/LV/Las_Vegas.csv")
     categories <- read.csv("datasets/Yelp/LV/las_vegas_categories.csv")
   }else if (ds == "To"){
