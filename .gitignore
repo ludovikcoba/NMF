@@ -34,6 +34,6 @@
 #other
 *.csv
 *.zip
-datasets/
+datasets/MovieLens/
 results/*.*
 *.txt

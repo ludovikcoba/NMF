@@ -5,14 +5,14 @@ getML<- function(ds){
 
   if(ds == "ml100k"){
     
-    dataset <- read_table2("datasets/ml-100k/u.data", #<---dataset
+    dataset <- read_table2("datasets/MovieLens/ml-100k/u.data", #<---dataset
                            col_names = FALSE)
     
     dataset <- dataset[,-4]
 
     colnames(dataset) <-  c("user", "item", "score")
     
-    categories <- read_delim("datasets/ml-100k/u.item", #<----categories' file
+    categories <- read_delim("datasets/MovieLens/ml-100k/u.item", #<----categories' file
                              ";", escape_double = FALSE, col_names = FALSE,      trim_ws = TRUE)
     
     
@@ -31,37 +31,37 @@ getML<- function(ds){
     
   }else if(ds == "ml1m") {
     
-    if(!file.exists("datasets/ml-1m/ratings.dat") || !file.exists("datasets/ml-1m/movies.dat")){
-      download.file("http://files.grouplens.org/datasets/movielens/ml-1m.zip", destfile = "datasets/ml1m.zip")
-      unzip("datasets/ml1m.zip", exdir = "datasets")
+    if(!file.exists("datasets/MovieLens/ml-1m/ratings.dat") || !file.exists("datasets/MovieLens/ml-1m/movies.dat")){
+      download.file("http://files.grouplens.org/datasets/movielens/ml-1m.zip", destfile = "datasets/MovieLens/ml1m.zip")
+      unzip("datasets/MovieLens/ml1m.zip", exdir = "datasets")
     }
     
-    pathRT <- "datasets/ml-1m/ratings.dat"
-    pathCT <- "datasets/ml-1m/movies.dat"
+    pathRT <- "datasets/MovieLens/ml-1m/ratings.dat"
+    pathCT <- "datasets/MovieLens/ml-1m/movies.dat"
     
     sep <- "::"
     
   } else if (ds == "ml10m"){
     
-    if(!file.exists("datasets/ml-10M100K/ratings.dat") || !file.exists("datasets/ml-10M100K/movies.dat")){
-      download.file("http://files.grouplens.org/datasets/movielens/ml-10m.zip", destfile = "datasets/ml10m.zip")
-      unzip("datasets/ml10m.zip", exdir = "datasets")
+    if(!file.exists("datasets/MovieLens/ml-10M100K/ratings.dat") || !file.exists("datasets/MovieLens/ml-10M100K/movies.dat")){
+      download.file("http://files.grouplens.org/datasets/movielens/ml-10m.zip", destfile = "datasets/MovieLens/ml10m.zip")
+      unzip("datasets/MovieLens/ml10m.zip", exdir = "datasets")
     }
     
-    pathRT <- "datasets/ml-10M100K/ratings.dat"
-    pathCT <- "datasets/ml-10M100K/movies.dat"
+    pathRT <- "datasets/MovieLens/ml-10M100K/ratings.dat"
+    pathCT <- "datasets/MovieLens/ml-10M100K/movies.dat"
     
     sep <- "::"
     
   }else if(ds == "ml20m"){
     
-    if(!file.exists("datasets/ml-20m/ratings.csv") || !file.exists("datasets/ml-20m/movies.csv")){
-      download.file("http://files.grouplens.org/datasets/movielens/ml-20m.zip", destfile = "datasets/ml20m.zip")
-      unzip("datasets/ml20m.zip", exdir = "datasets")
+    if(!file.exists("datasets/MovieLens/ml-20m/ratings.csv") || !file.exists("datasets/MovieLens/ml-20m/movies.csv")){
+      download.file("http://files.grouplens.org/datasets/movielens/ml-20m.zip", destfile = "datasets/MovieLens/ml20m.zip")
+      unzip("datasets/MovieLens/ml20m.zip", exdir = "datasets")
     }
     
-    pathRT <- "datasets/ml-20m/ratings.csv"
-    pathCT <- "datasets/ml-20m/movies.csv"
+    pathRT <- "datasets/MovieLens/ml-20m/ratings.csv"
+    pathCT <- "datasets/MovieLens/ml-20m/movies.csv"
     
     sep <- ","
     
