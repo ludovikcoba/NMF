@@ -35,14 +35,14 @@ if (!require(stringr)) install.packages("stringr", repos='http://cran.us.r-proje
 #######################
 
 #### Parameters - Config
-outputFile <- oFile
+outputFile <- paste0("results", oFile)
 
 Neigh <- 10
 Shrinkage <- 10 # damping on similarity computation.
 learningRate <- 0.001
 regCoef <- 0.001
 regCoefNovelty <- c(0:10)/10
-nrfeat <- 80 #nr latent features
+nrfeat <- 100 #nr latent features
 steps <- 100 # number of iterations
 reg <- 3 # 1 MF, 2 L2 regulariztion, 3 L1 regularization
 adjCos <- FALSE
