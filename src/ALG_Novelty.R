@@ -1,7 +1,7 @@
 NoveltyCat <- function(train, dataset, categories){
 
   users<- dplyr::inner_join(train, categories, by = c("item") ) # find to which category training items belong
-  
+
   # count how many times a user has seen a category only on the trainset
   nvl <- users %>%
     dplyr::select(-item, -score) %>%
@@ -30,7 +30,7 @@ NoveltyCat <- function(train, dataset, categories){
     data.frame(item = items$item, Novelty = usrNov)
     
   }
-  
+
   # compute and return novelty 
   users %>% 
     dplyr::mutate(Novelty = purrr::map2(items, usrNov, nvlCmp)) %>% 

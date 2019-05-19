@@ -2,11 +2,18 @@
 args = commandArgs(trailingOnly=TRUE)
 
 if (length(args)==0) {
-  stop("At least one argument must be supplied.", call.=FALSE)
+  stop("At least one argument must be given", call.=FALSE)
 } else {
-  ds = args[1]
-  oFile = args[2]
-  nov = args[3]
+  ds = args[1] # values: ml100k, ml1m, ml10m, ml20m, LA, To
+  if(!ds %in% c("ml100k", "ml1m", "ml10m", "ml20m", "LA", "To")){
+    error_msg <- "Argument 1 can be one of: ml100k, ml1m, ml10m, ml20m, LA, To" 
+    stop(error_msg)
+  }
+  oFile = args[2] # any output file
+  nov = args[3] # values: cat or pop
+  if(! nov %in% c("cat", "pop"))
+    error_msg <- "Argument 3 can be one of: cat, pop" 
+  stop(error_msg)
 }
 
 
@@ -17,6 +24,7 @@ if (!require(Rcpp)) install.packages("Rcpp", repos='http://cran.us.r-project.org
 if (!require(tidyverse)) install.packages("tidyverse", repos='http://cran.us.r-project.org')
 if (!require(dplyr)) install.packages("dplyr", repos='http://cran.us.r-project.org')
 if (!require(readr)) install.packages("readr", repos='http://cran.us.r-project.org')
+if (!require(stringr)) install.packages("stringr", repos='http://cran.us.r-project.org')
 
 #######################
 #######################
@@ -41,13 +49,22 @@ adjCos <- FALSE
 topN <- 10
 
 positiveThreshold <- 3 # when a ratign is considered a negative feedback
-source("src/readML_big.R")
+
 # Read Data
-
-dataset <- getML(ds)
-categories <- dataset[[2]]
-dataset <- dataset[[1]]
-
+if(str_detect(ds, "ml")){
+  source("src/readML_big.R")
+  dataset <- getML(ds)
+  categories <- dataset[[2]]
+  dataset <- dataset[[1]]
+}else{
+  if(ds == "LA"){
+    dataset <- read.csv("datasets/Yelp/LV/Las_Vegas.csv")
+    categories <- read.csv("datasets/Yelp/LV/las_vegas_categories.csv")
+  }else if (ds == "To"){
+    dataset <- read.csv("datasets/Yelp/Toronto/Toronto.csv")
+    categories <- read.csv("datasets/Yelp/Toronto/toronto_categories.csv")
+  }
+}
 
 source("src/evalSplit.R") # load the splitting function. Stratified splitting of the dataset in tran/test, given a splitting ratio.
 d <- evalSplit(dataset, 0.25) # split train/test
