@@ -32,7 +32,6 @@
 .Rproj.user
 
 #other
-*.csv
 *.zip
 datasets/MovieLens/
 results/*.*
