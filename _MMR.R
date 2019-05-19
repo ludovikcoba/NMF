@@ -11,9 +11,11 @@ if (length(args)==0) {
   }
   oFile = args[2] # any output file
   nov = args[3] # values: cat or pop
-  if(! nov %in% c("cat", "pop"))
+  if(! nov %in% c("cat", "pop")){
     error_msg <- "Argument 3 can be one of: cat, pop" 
-  stop(error_msg)
+    stop(error_msg)
+  }
+
 }
 
 ## Note: many method are imported from rrecsys
@@ -40,7 +42,7 @@ Neigh <- 10
 Shrinkage <- 10 # damping on similarity computation.
 learningRate <- 0.001
 regCoef <- 0.001
-trade_off <- c(0.3,0.5,0.7)
+trade_off <- 0.5
 nrfeat <- 80 #nr latent features
 steps <- 100 # number of iterations
 reg <- 3 # 1 MF, 2 L2 regulariztion, 3 L1 regularization
@@ -64,6 +66,21 @@ if(str_detect(ds, "ml")){
     categories <- read.csv("datasets/Yelp/Toronto/toronto_categories.csv")
   }
 }
+
+
+at_least_10_ratings <- dataset %>% 
+  dplyr::group_by(user) %>%
+  dplyr::summarise(nr_ratings = n()) %>%
+  dplyr::filter(nr_ratings >= 5)
+
+dataset <- semi_join(dataset, at_least_10_ratings)
+
+at_least_10_users <- dataset %>% 
+  dplyr::group_by(item) %>%
+  dplyr::summarise(nr_ratings = n()) %>%
+  dplyr::filter(nr_ratings >= 5)
+
+dataset <- semi_join(dataset, at_least_10_users)
 
 source("src/evalSplit.R") # load the splitting function. Stratified splitting of the dataset in tran/test, given a splitting ratio.
 d <- evalSplit(dataset, 0.25) # split train/test
@@ -144,6 +161,11 @@ itmFeatures <-as.data.frame(itmFeatures)
 for (trd in trade_off) {
   
   #### Evaluate 
+  distance <- dist(categories, method = "jaccard")
+  distance <- apply(distance, 1, function(x) data.frame(item2 = categories[,1], distance = x))
+  distance <- lapply(1:length(distance), function(x) cbind(rep(x, length(distance)), distance[[x]]  ))
+  distance <- do.call(rbind, distance)
+  colnames(distance) = c("item1", "item2", "dist")
   if(nov == "cat"){
     distance <- dist(categories, method = "jaccard")
     distance <- apply(distance, 1, function(x) data.frame(item2 = categories[,1], distance = x))
