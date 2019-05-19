@@ -11,9 +11,11 @@ if (length(args)==0) {
   }
   oFile = args[2] # any output file
   nov = args[3] # values: cat or pop
-  if(! nov %in% c("cat", "pop"))
+  if(! nov %in% c("cat", "pop")){
     error_msg <- "Argument 3 can be one of: cat, pop" 
-  stop(error_msg)
+    stop(error_msg)
+  }
+
 }
 
 
