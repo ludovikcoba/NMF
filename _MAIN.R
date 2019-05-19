@@ -37,7 +37,7 @@ if (!require(stringr)) install.packages("stringr", repos='http://cran.us.r-proje
 #######################
 
 #### Parameters - Config
-outputFile <- paste0("results", oFile)
+outputFile <- paste0("results/", oFile)
 
 Neigh <- 10
 Shrinkage <- 10 # damping on similarity computation.
