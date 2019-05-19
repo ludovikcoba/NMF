@@ -75,6 +75,13 @@ at_least_10_ratings <- dataset %>%
 
 dataset <- semi_join(dataset, at_least_10_ratings)
 
+at_least_10_users <- dataset %>% 
+  dplyr::group_by(item) %>%
+  dplyr::summarise(nr_ratings = n()) %>%
+  dplyr::filter(nr_ratings >= 10)
+
+dataset <- semi_join(dataset, at_least_10_users)
+
 
 source("src/evalSplit.R") # load the splitting function. Stratified splitting of the dataset in tran/test, given a splitting ratio.
 d <- evalSplit(dataset, 0.25) # split train/test
