@@ -41,11 +41,11 @@ outputFile <- paste0("results/", oFile)
 
 Neigh <- 10
 Shrinkage <- 10 # damping on similarity computation.
-learningRate <- 0.001
+learningRate <- 0.0001
 regCoef <- 0.001
 regCoefNovelty <- c(0:10)/10
-nrfeat <- 10 #nr latent features
-steps <- 100 # number of iterations
+nrfeat <- 80 #nr latent features
+steps <- 50# number of iterations
 reg <- 3 # 1 MF, 2 L2 regulariztion, 3 L1 regularization
 adjCos <- FALSE
 topN <- 10
@@ -68,19 +68,22 @@ if(str_detect(ds, "ml")){
   }
 }
 
-at_least_10_ratings <- dataset %>% 
-  dplyr::group_by(user) %>%
-  dplyr::summarise(nr_ratings = n()) %>%
-  dplyr::filter(nr_ratings >= 5)
 
-dataset <- semi_join(dataset, at_least_10_ratings)
-
-at_least_10_users <- dataset %>% 
+at_least_40_users <- dataset %>% 
   dplyr::group_by(item) %>%
   dplyr::summarise(nr_ratings = n()) %>%
-  dplyr::filter(nr_ratings >= 5)
+  dplyr::filter(nr_ratings >= 40)
 
-dataset <- semi_join(dataset, at_least_10_users)
+
+dataset <- semi_join(dataset, at_least_40_users)
+
+at_least_40_ratings <- dataset %>% 
+  dplyr::group_by(user) %>%
+  dplyr::summarise(nr_ratings = n()) %>%
+  dplyr::filter(nr_ratings >= 40)
+
+dataset <- semi_join(dataset, at_least_40_ratings)
+
 
 
 source("src/evalSplit.R") # load the splitting function. Stratified splitting of the dataset in tran/test, given a splitting ratio.
