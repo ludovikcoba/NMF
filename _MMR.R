@@ -49,7 +49,7 @@ adjCos <- FALSE
 topN <- 10
 
 trade_off <- 0.5
-x <- 80 # p-core
+x <- 40 # p-core
 
 
 learningRate <- 0.0001
