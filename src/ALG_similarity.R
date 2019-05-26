@@ -1,5 +1,8 @@
+sourceCpp("src/compute_similarity.cpp")
+
 similarity <- function(x, damp = 0, shrinkage = 0, by){
 
+  
 
   x <- x %>% 
     dplyr::arrange_at(dplyr::vars(by)) %>%

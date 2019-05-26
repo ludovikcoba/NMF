@@ -2,11 +2,11 @@
 args = commandArgs(trailingOnly=TRUE)
 
 if (length(args)==0) {
-  stop("At least one argument must be given", call.=FALSE)
+  stop("At least one argument must be given (Dataset, output, novelty alg).", call.=FALSE)
 } else {
   ds = args[1] # values: ml100k, ml1m, ml10m, ml20m, LA, To
-  if(!ds %in% c("ml100k", "ml1m", "ml10m", "ml20m", "LA", "To")){
-    error_msg <- "Argument 1 can be one of: ml100k, ml1m, ml10m, ml20m, LA, To" 
+  if(!ds %in% c("ml100k", "ml1m", "ml10m", "ml20m", "LV", "To")){
+    error_msg <- "Argument 1 can be one of: ml100k, ml1m, ml10m, ml20m, LV, To" 
     stop(error_msg)
   }
   oFile = args[2] # any output file
@@ -40,11 +40,23 @@ outputFile <- oFile
 
 Neigh <- 10
 Shrinkage <- 10 # damping on similarity computation.
-learningRate <- 0.001
+learningRate <- 0.0001
 regCoef <- 0.001
-trade_off <- 0.5
 nrfeat <- 80 #nr latent features
-steps <- 100 # number of iterations
+steps <- 50# number of iterations
+reg <- 3 # 1 MF, 2 L2 regulariztion, 3 L1 regularization
+adjCos <- FALSE
+topN <- 10
+
+trade_off <- 0.5
+x <- 80 # p-core
+
+
+learningRate <- 0.0001
+regCoef <- 0.001
+regCoefNovelty <- c(0:10)/10
+nrfeat <- 80 #nr latent features
+steps <- 50# number of iterations
 reg <- 3 # 1 MF, 2 L2 regulariztion, 3 L1 regularization
 adjCos <- FALSE
 topN <- 10
@@ -58,7 +70,7 @@ if(str_detect(ds, "ml")){
   categories <- dataset[[2]]
   dataset <- dataset[[1]]
 }else{
-  if(ds == "LA"){
+  if(ds == "LV"){
     dataset <- read.csv("datasets/Yelp/LV/Las_Vegas.csv")
     categories <- read.csv("datasets/Yelp/LV/las_vegas_categories.csv")
   }else if (ds == "To"){
@@ -68,19 +80,22 @@ if(str_detect(ds, "ml")){
 }
 
 
-at_least_10_ratings <- dataset %>% 
-  dplyr::group_by(user) %>%
-  dplyr::summarise(nr_ratings = n()) %>%
-  dplyr::filter(nr_ratings >= 5)
-
-dataset <- semi_join(dataset, at_least_10_ratings)
-
-at_least_10_users <- dataset %>% 
+at_least_x_users <- dataset %>% 
   dplyr::group_by(item) %>%
   dplyr::summarise(nr_ratings = n()) %>%
-  dplyr::filter(nr_ratings >= 5)
+  dplyr::filter(nr_ratings >= x)
 
-dataset <- semi_join(dataset, at_least_10_users)
+
+dataset <- semi_join(dataset, at_least_x_users)
+
+at_least_xr_ratings <- dataset %>% 
+  dplyr::group_by(user) %>%
+  dplyr::summarise(nr_ratings = n()) %>%
+  dplyr::filter(nr_ratings >= x)
+
+dataset <- semi_join(dataset, at_least_xr_ratings)
+
+categories <- semi_join(categories, dataset)
 
 source("src/evalSplit.R") # load the splitting function. Stratified splitting of the dataset in tran/test, given a splitting ratio.
 d <- evalSplit(dataset, 0.25) # split train/test
@@ -157,15 +172,12 @@ colnames(itmFeatures) <- c("item", paste0("f",1:nrfeat))
 itmFeatures <-as.data.frame(itmFeatures)
 
 #### Recommend
+source("src/ALG_similarity.R")
 
 for (trd in trade_off) {
   
   #### Evaluate 
-  distance <- dist(categories, method = "jaccard")
-  distance <- apply(distance, 1, function(x) data.frame(item2 = categories[,1], distance = x))
-  distance <- lapply(1:length(distance), function(x) cbind(rep(x, length(distance)), distance[[x]]  ))
-  distance <- do.call(rbind, distance)
-  colnames(distance) = c("item1", "item2", "dist")
+  
   if(nov == "cat"){
     distance <- dist(categories, method = "jaccard")
     distance <- apply(distance, 1, function(x) data.frame(item2 = categories[,1], distance = x))
@@ -173,26 +185,26 @@ for (trd in trade_off) {
     distance <- do.call(rbind, distance)
     colnames(distance) = c("item1", "item2", "dist")
     
+    
   }else{
-    rec_nvl <- NoveltyPop(d$train, rec %>% 
-                            dplyr::select(-rank) %>% 
-                            rename(score = predScore))
+    distance <- similarity(dataset, shrinkage = Shrinkage, by = c("item", "user", "score"))
+    distance <- getKNN(distance, length(unique(dataset$item)) - 1)
+    distance$sim <- 1 - distance$sim
+    colnames(distance) = c("item1", "item2", "dist")
   }
   
   
-  
   rec <- RecommendMMR(train, usrFeatures, itmFeatures, topN, trd, distance)
+
   
   #### Evaluate 
   
   if(nov == "cat"){
     rec_nvl <- NoveltyCat(d$train, rec %>% 
-                            dplyr::select(-rank) %>% 
-                            rename(score = predScore), categories)
+                            rename(score = rank), categories)
   }else{
     rec_nvl <- NoveltyPop(d$train, rec %>% 
-                            dplyr::select(-rank) %>% 
-                            rename(score = predScore))
+                            rename(score = rank))
   }
   
   
@@ -211,7 +223,7 @@ for (trd in trade_off) {
   
   
 }
-res <- cbind(regCoefNovelty,res)
+res <- cbind(trade_off,res)
 
 write.csv(res, outputFile)
 

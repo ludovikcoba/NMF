@@ -3,7 +3,6 @@
 #include <fstream>
 
 using namespace Rcpp;
-
 const int OBSERVATION = 0;
 const int INTERACTION = 1;
 const int WEIGHT = 2;
